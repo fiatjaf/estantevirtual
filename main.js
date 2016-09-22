@@ -1,4 +1,4 @@
-/* global bean, h, snabbdom, XMLHttpRequest, snabbdom_style, snabbdom_props, location, randomColor */
+/* global bean, h, snabbdom, XMLHttpRequest, snabbdom_style, snabbdom_props, location */
 
 // search on input
 var wait = {}
@@ -32,7 +32,9 @@ for (var i = 1; i <= currentSearches.length; i++) {
 }
 
 var state = {
-  stores: {s1: {}, s2: {}, s3: {}, s4: {}, s5: {}}
+  stores: {s1: {}, s2: {}, s3: {}, s4: {}, s5: {}},
+  storecost: {},
+  storemap: {}
 }
 
 function fetchResults (name, query) {
@@ -69,16 +71,7 @@ function handleResults (name, results, isNull) {
     state.stores[name][store.url] = store
   })
 
-  renderState()
-}
-
-var patch = snabbdom.init([snabbdom_props, snabbdom_style])
-var container = document.getElementById('results')
-var currentvnode = document.createElement('div')
-container.appendChild(currentvnode)
-
-function renderState () {
-  var storemap = {}
+  state.storemap = {}
   for (var s in state.stores) {
     for (var url in state.stores[s]) {
       var books = state.stores[s][url].books
@@ -87,17 +80,39 @@ function renderState () {
           return book
         })
 
-      if (storemap[url]) {
-        storemap[url].books = storemap[url].books.concat(books)
+      if (state.storemap[url]) {
+        state.storemap[url].books = state.storemap[url].books.concat(books)
       } else {
-        storemap[url] = state.stores[s][url]
-        storemap[url].books = books
+        state.storemap[url] = state.stores[s][url]
+        state.storemap[url].books = books
       }
     }
   }
 
-  var storelist = Object.keys(storemap)
-    .map(function (url) { return storemap[url] })
+  renderState()
+}
+
+bean.on(document.body, 'change', 'input[type="checkbox"]', function (e) {
+  var sturl = e.target.parentNode.parentNode.parentNode.parentNode.parentNode.firstChild.href
+  var price = parseFloat(e.target.parentNode.title)
+  var diff = e.target.checked ? +price : -price
+  state.storecost[sturl] = (state.storecost[sturl] || 0) + diff
+  if (state.storecost[sturl] === 0) {
+    delete state.storecost[sturl]
+  }
+
+  renderState()
+})
+
+// prepare snabbdom
+var patch = snabbdom.init([snabbdom_props, snabbdom_style])
+var container = document.getElementById('results')
+var currentvnode = document.createElement('div')
+container.appendChild(currentvnode)
+
+function renderState () {
+  var storelist = Object.keys(state.storemap)
+    .map(function (url) { return state.storemap[url] })
     .map(function (store) {
       store.books = store.books
         .sort(function (a, b) { return b.title > a.title ? 1 : -1 })
@@ -109,18 +124,27 @@ function renderState () {
     storelist.map(function (store) {
       return h('li', {key: store.url}, [
         h('a', {props: {href: store.url, target: '_blank'}}, store.name),
-        ' -- ',
-        h('span', store.place),
+        ', ',
+        store.place.split(' - ').reverse().join(', '),
+        state.storecost[store.url]
+          ? ' | ' + state.storecost[store.url]
+          : '',
         h('table',
           store.books.map(function (book) {
             return h('tr', {key: book.title + book.author, props: {className: book.s}}, [
-              h('td.title', book.title + ', ' + book.author),
+              h('td.title', [
+                h('b', book.title),
+                ', ' + book.author
+              ]),
               h('td.price',
                 book.offers.map(function (o) {
-                  return h('a', {
+                  return h('span', {
                     key: o.url,
-                    props: {href: o.url, target: '_blank'}
-                  }, parseInt(o.price))
+                    props: {title: o.price}
+                  }, [
+                    h('input', {props: {type: 'checkbox'}}),
+                    h('a', {props: {href: o.url, target: '_blank'}}, parseInt(o.price))
+                  ])
                 }).reduce(function (acc, off, i) {
                   acc.push(off)
                   if (i < book.offers.length - 1) {
@@ -139,8 +163,8 @@ function renderState () {
 }
 
 // randomize colors (sooometimes)
-if (Math.random() > 0.2) {
-  for (var s = 1; s <= 5; s++) {
-    document.documentElement.style.setProperty('--s' + s, randomColor({luminosity: 'dark'}))
-  }
-}
+// if (Math.random() > 0.2) {
+//   for (var s = 1; s <= 5; s++) {
+//     document.documentElement.style.setProperty('--s' + s, randomColor({luminosity: 'dark'}))
+//   }
+// }

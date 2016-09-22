@@ -38,9 +38,8 @@ func handler(ctx *fasthttp.RequestCtx) {
 		fasthttp.ServeFile(ctx, "main.js")
 	case "/search":
 		query := ctx.QueryArgs().Peek("q")
-		log.Print(query)
 		data := fetchDataForQuery(string(query))
-		ctx.SetContentType("application/json; charset=UTF-8")
+		ctx.SetContentType("application/json")
 		ctx.SetBody(data)
 	default:
 		ctx.SetStatusCode(404)
