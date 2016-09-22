@@ -53,7 +53,10 @@ func fetchDataForQuery(search string) []byte {
 		return resp
 	}
 
-	query := (url.Values{"q": []string{search}}).Encode()
+	query := (url.Values{
+		"q":     []string{search},
+		"limit": []string{"300"},
+	}).Encode()
 	doc, err := docFromISO8859("https://www.estantevirtual.com.br/busca?" + query)
 	if err != nil {
 		log.Print(err)
@@ -68,12 +71,6 @@ func fetchDataForQuery(search string) []byte {
 			s := goquery.NewDocumentFromNode(n)
 
 			if bookUrl, ok := s.Attr("href"); ok {
-				b := Book{
-					Title:  s.Find(".busca-title").Text(),
-					Author: s.Find(".busca-author").Text(),
-					Offers: make([]BookOffer, 1),
-				}
-
 				bookDoc, err := docFromISO8859("https://www.estantevirtual.com.br" + bookUrl)
 				if err != nil {
 					return
@@ -93,10 +90,18 @@ func fetchDataForQuery(search string) []byte {
 						st = ist.(Store)
 					}
 
-					b.Offers[0].Price = l.Find(".busca-price-currency + span").Text()
-					b.Offers[0].URL, _ = l.Find("a").Attr("href")
+					bookUrl, _ = l.Find("a").Attr("href")
 
-					st.Books = append(st.Books, b)
+					st.Books = append(st.Books, Book{
+						Title:  s.Find(".busca-title").Text(),
+						Author: s.Find(".busca-author").Text(),
+						Offers: []BookOffer{
+							BookOffer{
+								Price: l.Find(".busca-price-currency + span").Text(),
+								URL:   bookUrl,
+							},
+						},
+					})
 					cstores.Set(url, st)
 				})
 			}
