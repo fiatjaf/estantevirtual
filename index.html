@@ -1,29 +1,96 @@
 <!doctype html>
+<meta charset=utf-8>
 <title>busca múltipla na estante virtual</title>
 <style>
+* { font-family: monospace; font-size: 102%; }
+a { text-decoration: none }
+a, a:visited { color: blue }
+a:hover { text-decoration: underline }
+ul { padding: 0; list-style: none; }
+li { margin-bottom: 15px }
 table {
+  width: 100%;
   border: 1px solid black;
   border-collapse: collapse;
 }
-td:last-child {
-  padding-left: 18px;
+tr:hover td { background-color: #eeeeee }
+td { padding: 1px 6px }
+td.title { width: 70% }
+td.price { font-size: 90%; text-align: right; }
+input {
+  padding: 3px;
+  font-size: 120%;
 }
-.s1 { color: green }
-.s2 { color: red }
-.s3 { color: blue }
-.s4 { color: grey }
-.s5 { color: orange }
+input + span { display: block; font-size: 90% }
+#search { margin-top: 26px }
+#search > div {
+  margin: 6px;
+}
+.s1 td.title, input[name="s1"] {
+  color: #01FF70;
+  color: var(--s1, #01FF70);
+}
+.s2 td.title, input[name="s2"] {
+  color: #FF4136;
+  color: var(--s2, #FF4136);
+}
+.s3 td.title, input[name="s3"] {
+  color: #0074D9;
+  color: var(--s3, #0074D9);
+}
+.s4 td.title, input[name="s4"] {
+  color: #3D9970;
+  color: var(--s4, #3D9970);
+}
+.s5 td.title, input[name="s5"] {
+  color: #FFDC00;
+  color: var(--s5, #FFDC00);
+}
+
+#container {
+  width: 900px;
+  max-width: 97%;
+  margin: auto;
+  display: -webkit-flex;
+  display: flex;
+  flex-wrap: wrap;
+}
+#search {
+  -webkit-flex: 1;
+          flex: 1;
+}
+#results{
+  -webkit-flex: 3;
+          flex: 3;
+  min-width: 370px;
+}
 </style>
 
 <body>
-  <div>
-    <input name=s1>
-    <input name=s2>
-    <input name=s3>
-    <input name=s4>
-    <input name=s5>
-  </div>
-  <div id=results>
+  <div id=container>
+    <div id=search>
+      <div>
+        <input name=s1>
+        <span></span>
+      </div>
+      <div>
+        <input name=s2>
+        <span></span>
+      </div>
+      <div>
+        <input name=s3>
+        <span></span>
+      </div>
+      <div>
+        <input name=s4>
+        <span></span>
+      </div>
+      <div>
+        <input name=s5>
+        <span></span>
+      </div>
+    </div>
+    <div id=results></div>
   </div>
 </body>
 
@@ -32,88 +99,5 @@ td:last-child {
 <script src="https://cdn.rawgit.com/snabbdom/snabbdom/3e3acfcc54853a69890ddd917196dabc5028c215/dist/h.min.js"></script>
 <script src="https://cdn.rawgit.com/snabbdom/snabbdom/3e3acfcc54853a69890ddd917196dabc5028c215/dist/snabbdom_style.min.js"></script>
 <script src="https://cdn.rawgit.com/snabbdom/snabbdom/3e3acfcc54853a69890ddd917196dabc5028c215/dist/snabbdom_props.min.js"></script>
-<script>
-var wait = {}
-bean.on(document.body, 'input', 'input', function (e) {
-  clearTimeout(wait[e.target.name])
-  wait[e.target.name] = setTimeout(fetchResults.bind(null, e.target.name, e.target.value), 2000)
-})
-
-var state = {
-  stores: {s1: {}, s2: {}, s3: {}, s4: {}, s5: {}}
-}
-
-function fetchResults (name, query) {
-  var xhr = new XMLHttpRequest()
-  xhr.open('GET', '/search?q=' + query.replace(/ /g, '+'))
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState !== 4) return
-    handleResults(name, JSON.parse(xhr.responseText))
-  }
-  xhr.send()
-}
-
-function handleResults (name, results) {
-  results.forEach(function (store) {
-    state.stores[name][store.url] = store
-  })
-
-  renderState()
-}
-
-var patch = snabbdom.init([snabbdom_props, snabbdom_style])
-var container = document.getElementById('results')
-var currentvnode = document.createElement('div')
-container.appendChild(currentvnode)
-
-function renderState () {
-  var storemap = {}
-  for (var s in state.stores) {
-    for (var url in state.stores[s]) {
-      var books = state.stores[s][url].books
-        .map(function (book) {
-          book.s = s
-          return book
-        })
-
-      if (storemap[url]) {
-        storemap[url].books = storemap[url].books.concat(books)
-      } else {
-        storemap[url] = state.stores[s][url]
-        storemap[url].books = books
-      }
-    }
-  }
-
-  var storelist = Object.keys(storemap)
-    .map(function (url) { return storemap[url] })
-    .map(function (store) {
-      store.books = store.books
-        .sort(function (a, b) { return b.title > a.title ? 1 : -1 })
-      return store
-    })
-    .sort(function (a, b) { return b.books.length - a.books.length })
-
-  var newvnode = h('ul',
-    storelist.map(function (store) {
-      return h('li', [
-        h('a', {props: {href: store.url, target: '_blank'}}, store.name),
-        ' -- ',
-        h('span', store.place),
-        h('table',
-          store.books.map(function (book) {
-            return h('tr', {props: {className: book.s}}, [
-              h('td', book.title),
-              h('td', book.author),
-              h('td', [
-                h('a', {props: {href: book.url, target: '_blank'}}, book.price)
-              ])
-            ])
-          })
-        )
-      ])
-    })
-  )
-  currentvnode = patch(currentvnode, newvnode)
-}
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/randomcolor/0.4.4/randomColor.min.js"></script>
+<script src="main.js"></script>

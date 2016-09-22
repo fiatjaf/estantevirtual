@@ -34,8 +34,11 @@ func handler(ctx *fasthttp.RequestCtx) {
 	switch string(ctx.Path()) {
 	case "/":
 		fasthttp.ServeFile(ctx, "index.html")
+	case "/main.js":
+		fasthttp.ServeFile(ctx, "main.js")
 	case "/search":
 		query := ctx.QueryArgs().Peek("q")
+		log.Print(query)
 		data := fetchDataForQuery(string(query))
 		ctx.SetContentType("application/json; charset=UTF-8")
 		ctx.SetBody(data)
@@ -69,6 +72,7 @@ func fetchDataForQuery(search string) []byte {
 				b := Book{
 					Title:  s.Find(".busca-title").Text(),
 					Author: s.Find(".busca-author").Text(),
+					Offers: make([]BookOffer, 1),
 				}
 
 				bookDoc, err := docFromISO8859("https://www.estantevirtual.com.br" + bookUrl)
@@ -90,8 +94,8 @@ func fetchDataForQuery(search string) []byte {
 						st = ist.(Store)
 					}
 
-					b.Price = l.Find(".busca-price-currency + span").Text()
-					b.URL, _ = l.Find("a").Attr("href")
+					b.Offers[0].Price = l.Find(".busca-price-currency + span").Text()
+					b.Offers[0].URL, _ = l.Find("a").Attr("href")
 
 					st.Books = append(st.Books, b)
 					cstores.Set(url, st)
@@ -106,11 +110,35 @@ func fetchDataForQuery(search string) []byte {
 		<-sem
 	}
 
+	// turning the concurrent map into a list of stores
 	keys := cstores.Keys()
 	stores := make([]Store, len(keys))
 	for i, k := range keys {
-		st, _ := cstores.Get(k)
-		stores[i] = st.(Store)
+		ist, _ := cstores.Get(k)
+		st := ist.(Store)
+
+		// inside each store, turn occurrences of the same book into one
+		condensedbooks := make(map[string]Book)
+		for _, book := range st.Books {
+			var cbook Book
+			var ok bool
+			if cbook, ok = condensedbooks[book.Title]; !ok {
+				cbook = Book{
+					Title:  book.Title,
+					Author: book.Author,
+				}
+			}
+			cbook.Offers = append(cbook.Offers, book.Offers[0])
+			condensedbooks[cbook.Title] = cbook
+		}
+		st.Books = make([]Book, len(condensedbooks))
+		var j int
+		for _, b := range condensedbooks {
+			st.Books[j] = b
+			j++
+		}
+
+		stores[i] = st
 	}
 
 	data, err := json.Marshal(stores)
@@ -127,10 +155,14 @@ func fetchDataForQuery(search string) []byte {
 }
 
 type Book struct {
-	Title  string `json:"title"`
-	Author string `json:"author"`
-	Price  string `json:"price"`
-	URL    string `json:"url"`
+	Title  string      `json:"title"`
+	Author string      `json:"author"`
+	Offers []BookOffer `json:"offers"`
+}
+
+type BookOffer struct {
+	Price string `json:"price"`
+	URL   string `json:"url"`
 }
 
 type Store struct {
