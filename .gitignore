@@ -1,3 +1,4 @@
 *.swo
 *.swp
 *.env
+*.gz

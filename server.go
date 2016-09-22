@@ -32,6 +32,8 @@ func main() {
 
 func handler(ctx *fasthttp.RequestCtx) {
 	switch string(ctx.Path()) {
+	case "/":
+		fasthttp.ServeFile(ctx, "index.html")
 	case "/search":
 		query := ctx.QueryArgs().Peek("q")
 		data := fetchDataForQuery(string(query))
