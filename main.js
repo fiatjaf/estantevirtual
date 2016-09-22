@@ -37,7 +37,7 @@ var state = {
 
 function fetchResults (name, query) {
   if (query.length < 3) {
-    handleResults(name, [])
+    handleResults(name, [], true)
   }
 
   var xhr = new XMLHttpRequest()
@@ -49,15 +49,19 @@ function fetchResults (name, query) {
   xhr.send()
 }
 
-function handleResults (name, results) {
+function handleResults (name, results, isNull) {
   // tell user how many results we have
-  var nbooks = results.reduce(function (acc, store) {
-    return acc + store.books.reduce(function (acc, book) {
-      return acc + book.offers.length
-    }, 0)
-  }, 0)
   var infobox = document.querySelector('input[name="' + name + '"]').nextElementSibling
-  infobox.innerHTML = nbooks + ' livros em ' + results.length + ' sebos'
+  if (isNull) {
+    infobox.innerHTML = ''
+  } else {
+    var nbooks = results.reduce(function (acc, store) {
+      return acc + store.books.reduce(function (acc, book) {
+        return acc + book.offers.length
+      }, 0)
+    }, 0)
+    infobox.innerHTML = nbooks + ' livros em ' + results.length + ' sebos'
+  }
 
   // change global state
   state.stores[name] = {}
@@ -103,17 +107,20 @@ function renderState () {
 
   var newvnode = h('ul',
     storelist.map(function (store) {
-      return h('li', [
+      return h('li', {key: store.url}, [
         h('a', {props: {href: store.url, target: '_blank'}}, store.name),
         ' -- ',
         h('span', store.place),
         h('table',
           store.books.map(function (book) {
-            return h('tr', {props: {className: book.s}}, [
+            return h('tr', {key: book.title + book.author, props: {className: book.s}}, [
               h('td.title', book.title + ', ' + book.author),
               h('td.price',
                 book.offers.map(function (o) {
-                  return h('a', {props: {href: o.url, target: '_blank'}}, parseInt(o.price))
+                  return h('a', {
+                    key: o.url,
+                    props: {href: o.url, target: '_blank'}
+                  }, parseInt(o.price))
                 }).reduce(function (acc, off, i) {
                   acc.push(off)
                   if (i < book.offers.length - 1) {
