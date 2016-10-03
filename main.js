@@ -1,4 +1,6 @@
-/* global bean, h, snabbdom, XMLHttpRequest, snabbdom_style, snabbdom_props, location */
+/* global bean, reactHyperscript, React, ReactDOM, location */
+
+var h = reactHyperscript
 
 // search on input
 var wait = {}
@@ -42,7 +44,7 @@ function fetchResults (name, query) {
     handleResults(name, [], true)
   }
 
-  var xhr = new XMLHttpRequest()
+  var xhr = new window.XMLHttpRequest()
   xhr.open('GET', '/search?q=' + query.replace(/ /g, '+'))
   xhr.onreadystatechange = function () {
     if (xhr.readyState !== 4) return
@@ -104,67 +106,66 @@ bean.on(document.body, 'change', 'input[type="checkbox"]', function (e) {
   renderState()
 })
 
-// prepare snabbdom
-var patch = snabbdom.init([snabbdom_props, snabbdom_style])
-var container = document.getElementById('results')
-var currentvnode = document.createElement('div')
-container.appendChild(currentvnode)
+var Component = React.createClass({
+  render: function render () {
+    var storelist = Object.keys(state.storemap)
+      .map(function (url) { return state.storemap[url] })
+      .map(function (store) {
+        store.books = store.books
+          .sort(function (a, b) { return b.title > a.title ? 1 : -1 })
+        return store
+      })
+      .sort(function (a, b) { return b.books.length - a.books.length })
 
+    return h('ul',
+      storelist.map(function (store) {
+        return h('li', {key: store.url}, [
+          h('a', {href: store.url, target: '_blank'}, store.name),
+          ', ',
+          store.place.split(' - ').reverse().join(', '),
+          state.storecost[store.url]
+            ? ' | ' + state.storecost[store.url]
+            : '',
+          h('table', [
+            h('tbody',
+              store.books.map(function (book) {
+                return h('tr', {key: book.title + ', ' + book.author, className: book.s}, [
+                  h('td.title', [
+                    h('b', book.title),
+                    ', ' + book.author
+                  ]),
+                  h('td.price',
+                    book.offers.map(function (o) {
+                      return h('span', {
+                        key: o.url,
+                        title: o.price
+                      }, [
+                        h('input', {type: 'checkbox'}),
+                        h('a', {href: o.url, target: '_blank'}, parseInt(o.price))
+                      ])
+                    }).reduce(function (acc, off, i) {
+                      acc.push(off)
+                      if (i < book.offers.length - 1) {
+                        acc.push(', ')
+                      }
+                      return acc
+                    }, [])
+                  )
+                ])
+              })
+            )
+          ])
+        ])
+      })
+    )
+  }
+})
+
+var component
 function renderState () {
-  var storelist = Object.keys(state.storemap)
-    .map(function (url) { return state.storemap[url] })
-    .map(function (store) {
-      store.books = store.books
-        .sort(function (a, b) { return b.title > a.title ? 1 : -1 })
-      return store
-    })
-    .sort(function (a, b) { return b.books.length - a.books.length })
-
-  var newvnode = h('ul',
-    storelist.map(function (store) {
-      return h('li', {key: store.url}, [
-        h('a', {props: {href: store.url, target: '_blank'}}, store.name),
-        ', ',
-        store.place.split(' - ').reverse().join(', '),
-        state.storecost[store.url]
-          ? ' | ' + state.storecost[store.url]
-          : '',
-        h('table',
-          store.books.map(function (book) {
-            return h('tr', {key: book.title + book.author, props: {className: book.s}}, [
-              h('td.title', [
-                h('b', book.title),
-                ', ' + book.author
-              ]),
-              h('td.price',
-                book.offers.map(function (o) {
-                  return h('span', {
-                    key: o.url,
-                    props: {title: o.price}
-                  }, [
-                    h('input', {props: {type: 'checkbox'}}),
-                    h('a', {props: {href: o.url, target: '_blank'}}, parseInt(o.price))
-                  ])
-                }).reduce(function (acc, off, i) {
-                  acc.push(off)
-                  if (i < book.offers.length - 1) {
-                    acc.push(', ')
-                  }
-                  return acc
-                }, [])
-              )
-            ])
-          })
-        )
-      ])
-    })
-  )
-  currentvnode = patch(currentvnode, newvnode)
+  if (component) {
+    component.forceUpdate()
+  } else {
+    component = ReactDOM.render(React.createElement(Component), document.getElementById('results'))
+  }
 }
-
-// randomize colors (sooometimes)
-// if (Math.random() > 0.2) {
-//   for (var s = 1; s <= 5; s++) {
-//     document.documentElement.style.setProperty('--s' + s, randomColor({luminosity: 'dark'}))
-//   }
-// }
