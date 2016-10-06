@@ -40,6 +40,7 @@ func handler(ctx *fasthttp.RequestCtx) {
 		query := ctx.QueryArgs().Peek("q")
 		data := fetchDataForQuery(string(query))
 		ctx.SetContentType("application/json")
+		ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
 		ctx.SetBody(data)
 	default:
 		ctx.SetStatusCode(404)
@@ -114,10 +115,10 @@ func fetchDataForQuery(search string) []byte {
 		<-sem
 	}
 
-	// turning the concurrent map into a list of stores
+	// turning the concurrent map into a map of stores
 	keys := cstores.Keys()
-	stores := make([]Store, len(keys))
-	for i, k := range keys {
+	stores := make(map[string]Store)
+	for _, k := range keys {
 		ist, _ := cstores.Get(k)
 		st := ist.(Store)
 
@@ -142,7 +143,7 @@ func fetchDataForQuery(search string) []byte {
 			j++
 		}
 
-		stores[i] = st
+		stores[st.URL] = st
 	}
 
 	data, err := json.Marshal(stores)
