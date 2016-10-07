@@ -167,15 +167,19 @@ view model =
             Found _ r -> r
         results = Array.map getResult model.searches
     in
-        div [ id "container" ]
-            [ div [ id "search" ]
-                [ div []
-                    ( Array.indexedMap (lazy2 viewSearchBox) model.searches
-                        |> Array.toList
-                    )
-                , button [ onClick AddBox ] [ text "mais" ]
+        node "html" []
+            [ node "link" [ rel "stylesheet", href "styles.css" ] []
+            , node "title" [] [ text "busca múltipla na estante virtual" ]
+            , div [ id "container" ]
+                [ div [ id "search" ]
+                    [ div []
+                        ( Array.indexedMap (lazy2 viewSearchBox) model.searches
+                            |> Array.toList
+                        )
+                    , button [ onClick AddBox ] [ text "mais" ]
+                    ]
+                , div [ id "results" ] [ lazy viewResults <| results ]
                 ]
-            , div [ id "results" ] [ lazy viewResults <| results ]
             ]
 
 
@@ -190,7 +194,8 @@ viewSearchBox i search =
     in
         div []
             [ input
-                [ onBlur (SearchThis i)
+                [ name <| "s" ++ (toString i)
+                , onBlur <| SearchThis i
                 , onInput (\v -> UpdateBox (i, v))
                 ] [ text search.query ]
             , span [] [ text message ]
@@ -199,9 +204,6 @@ viewSearchBox i search =
 viewResults : Array SearchResults -> Html Msg
 viewResults allResults =
     let
-        addStores st1 st2 = { st1 | books = List.concat [st1.books st2.books] }
-        insert k v = Dict.insert k v
-        join k v1 v2 = Dict.insert k <| addStores v1 v2
         aggStores : String -> Store -> Dict String Store -> Dict String Store
         aggStores key store acc = Dict.update
             key
@@ -246,7 +248,19 @@ keyedViewBook book =
             [ b [] [ text book.title ]
             , text <| ", " ++ book.author
             ]
-        , td [ class "price" ] [ text <| String.concat <| List.map .price book.offers ]
+        , Keyed.node "td" [ class "price" ]
+            (List.map keyedViewOffer book.offers)
+        ]
+    )
+
+keyedViewOffer : Offer -> (String, Html Msg)
+keyedViewOffer o =
+    ( o.url
+    , span [ title o.price ]
+        [ text " "
+        , input [ type' "checkbox" ] []
+        , a [ href o.url, target "_blank" ]
+            [ text <| Maybe.withDefault "~" <| List.head <| String.split "," o.price ]
         ]
     )
 

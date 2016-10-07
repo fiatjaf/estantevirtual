@@ -3,3 +3,4 @@
 *.env
 *.gz
 elm-stuff
+bundle.js

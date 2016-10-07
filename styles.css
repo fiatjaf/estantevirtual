@@ -1,0 +1,58 @@
+* { font-family: monospace; font-size: 102%; }
+a { text-decoration: none }
+a, a:visited { color: blue }
+a:hover { text-decoration: underline }
+ul { padding: 0; list-style: none; }
+li { margin-bottom: 15px }
+table {
+  width: 100%;
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+tr:hover td { background-color: #eeeeee }
+td { padding: 1px 6px }
+td.title { width: 70% }
+td.price { font-size: 90%; text-align: right; }
+input {
+  padding: 3px;
+  font-size: 120%;
+}
+input + span { display: block; font-size: 90% }
+#search { margin-top: 26px }
+#search > div {
+  margin: 6px;
+}
+tr input[type="checkbox"] { display: none }
+tr:hover input[type="checkbox"], tr input:checked { display: inline }
+.s0 td.title, input[name="s0"] { color: #85144b }
+.s1 td.title, input[name="s1"] { color: #01FF70 }
+.s2 td.title, input[name="s2"] { color: #FF4136 }
+.s3 td.title, input[name="s3"] { color: #0074D9 }
+.s4 td.title, input[name="s4"] { color: #3D9970 }
+.s5 td.title, input[name="s5"] { color: #FF851B }
+.s6 td.title, input[name="s6"] { color: #001F3F }
+.s7 td.title, input[name="s7"] { color: #F012BE }
+.s8 td.title, input[name="s8"] { color: #2ECC40 }
+.s9 td.title, input[name="s9"] { color: #111111 }
+.s10 td.title, input[name="s10"] { color: #FFDC00 }
+.s11 td.title, input[name="s11"] { color: #B10DC9 }
+.s12 td.title, input[name="s12"] { color: #AAAAAA }
+.s13 td.title, input[name="s13"] { color: #39CCCC }
+
+#container {
+  width: 900px;
+  max-width: 97%;
+  margin: auto;
+  display: -webkit-flex;
+  display: flex;
+  flex-wrap: wrap;
+}
+#search {
+  -webkit-flex: 1;
+          flex: 1;
+}
+#results{
+  -webkit-flex: 3;
+          flex: 3;
+  min-width: 370px;
+}
