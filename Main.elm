@@ -176,7 +176,10 @@ view model =
                         ( Array.indexedMap (lazy2 viewSearchBox) model.searches
                             |> Array.toList
                         )
-                    , button [ onClick AddBox ] [ text "mais" ]
+                    , button
+                        [ style [ ("display", "block"), ("margin", "auto") ]
+                        , onClick AddBox
+                        ] [ text "mais um campo de busca" ]
                     ]
                 , div [ id "results" ] [ lazy viewResults <| results ]
                 ]
@@ -189,7 +192,13 @@ viewSearchBox i search =
         message = case search.status of
             Waiting -> ""
             Searching _ -> "procurando..."
-            Found _ res -> toString (Dict.size res) ++ " stores."
+            Found _ res ->
+                let
+                    nbooks = List.length <| List.concat <| List.map .books <| Dict.values res
+                    nstores = Dict.size res
+                in
+                    if nbooks == 0 then "nada foi encontrado."
+                    else (toString nbooks) ++ " resultados em " ++ (toString nstores) ++ " lojas."
             Error text -> text
     in
         div []
