@@ -23,7 +23,7 @@ main =
         { init = init
         , view = view
         , update = update
-        , urlUpdate = urlUpdate
+        , urlUpdate = searchesFromURL
         , subscriptions = \_ -> Sub.none
         }
 
@@ -32,7 +32,7 @@ main =
 
 type alias Model =
     { searches : Array Search
-    , baseURL : String
+    , apiURL : String
     }
 
 type alias Search =
@@ -74,16 +74,16 @@ initialSearch = Search "" Waiting
 init : Location -> (Model, Cmd Msg)
 init l =
     let
-        searches = Array.initialize 4 <| always initialSearch
         port_ = case String.toInt l.port_ of
             Ok p -> p + 1
             Err e -> if l.protocol == "http:" then 80 else 443
         host = case (String.split ":" l.host) |> List.head of
             Nothing -> l.host
             Just h -> h
-        baseURL = l.protocol ++ "//" ++ host ++ ":" ++ toString port_
+        apiURL = l.protocol ++ "//" ++ host ++ ":" ++ toString port_
+        initialModel = Model Array.empty apiURL
     in
-        (Model searches baseURL, Cmd.none)
+        searchesFromURL l initialModel
 
 
 -- UPDATE
@@ -116,18 +116,23 @@ update msg model =
                         if s.query == "" then Waiting else Searching s.query
                     }
                 updated = { model | searches = Array.Extra.update i u model.searches }
-                fetch = fetchBooks model.baseURL i search.query
+                fetch = fetchBooks model.apiURL i search.query
+                urlchange = Navigation.newUrl
+                    <| (++) "#"
+                    <| String.join "|"
+                    <| Array.toList
+                    <| Array.map .query model.searches
             in case search.status of
                 Found q _ ->
                     if q == search.query
-                        then (model, Cmd.none)
-                        else (updated, fetch)
+                        then model ! [ urlchange ]
+                        else updated ! [ fetch, urlchange ]
                 Searching q ->
                     if q == search.query
-                        then (model, Cmd.none)
-                        else (updated, fetch)
-                Waiting -> (updated, fetch)
-                Error _ -> (updated, fetch)
+                        then model ! [ urlchange ]
+                        else updated ! [ fetch, urlchange ]
+                Waiting -> updated ! [ fetch, urlchange ]
+                Error _ -> updated ! [ fetch, urlchange ]
         AddBox ->
             { model
                 | searches = Array.push initialSearch model.searches
@@ -150,8 +155,39 @@ update msg model =
                     }
             in { model | searches = Array.Extra.update i u model.searches } ! []
 
-urlUpdate : Location -> Model -> (Model, Cmd Msg)
-urlUpdate l model = (model, Cmd.none)
+searchesFromURL : Location -> Model -> (Model, Cmd Msg)
+searchesFromURL l model =
+    let
+        queries =
+            Array.filter (\x -> x /= "") <| Array.fromList <| String.split "|" <| String.dropLeft 1 l.hash
+        newsearches = Array.indexedMap
+            ( \i newquery ->
+                case Array.get i model.searches of
+                    Nothing -> Search newquery (Searching newquery)
+                    Just old ->
+                        if old.query == newquery then
+                            old
+                        else
+                            if newquery == "" then Search "" Waiting
+                            else Search newquery (Searching newquery)
+            )
+            queries
+        changedsearches = Array.indexedMap
+            ( \i s ->
+                case s.status of
+                    Searching q -> Just (i, q)
+                    Waiting -> Nothing
+                    Found _ _ -> Nothing
+                    Error _ -> Nothing
+            )
+            newsearches
+                |> Array.Extra.filterMap identity
+        tasks = Array.toList <| Array.map (\(i, q) -> fetchBooks model.apiURL i q ) changedsearches
+        filledsearches =
+            Array.append newsearches
+                <| Array.initialize (4 - Array.length newsearches) (always initialSearch)
+    in
+        { model | searches = filledsearches } ! tasks
 
 
 -- VIEW
@@ -172,7 +208,8 @@ view model =
             , node "title" [] [ text "busca múltipla na estante virtual" ]
             , div [ id "container" ]
                 [ div [ id "search" ]
-                    [ div []
+                    [ text "procure por livro ou autor, ou uma mistura dos dois:"
+                    , div []
                         ( Array.indexedMap (lazy2 viewSearchBox) model.searches
                             |> Array.toList
                         )
@@ -204,9 +241,10 @@ viewSearchBox i search =
         div []
             [ input
                 [ name <| "s" ++ (toString i)
+                , value search.query
                 , onBlur <| SearchThis i
                 , onInput (\v -> UpdateBox (i, v))
-                ] [ text search.query ]
+                ] []
             , span [] [ text message ]
             ]
 
@@ -277,9 +315,9 @@ keyedViewOffer o =
 -- HTTP
 
 fetchBooks : String -> Int -> String -> Cmd Msg
-fetchBooks baseURL i query =
+fetchBooks apiURL i query =
     let
-        url = baseURL ++ "/search?q=" ++ query
+        url = apiURL ++ "/search?q=" ++ query
         decodeOffer = J.object2 Offer ("price" := J.string) ("url" := J.string)
         decodeBook = J.object4 Book
             ("offers" := (J.list decodeOffer))
