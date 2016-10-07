@@ -32,6 +32,7 @@ main =
 
 type alias Model =
     { searches : Array Search
+    , selected : Dict String (Store, Dict String (Offer, Book))
     , apiURL : String
     }
 
@@ -81,7 +82,7 @@ init l =
             Nothing -> l.host
             Just h -> h
         apiURL = l.protocol ++ "//" ++ host ++ ":" ++ toString port_
-        initialModel = Model Array.empty apiURL
+        initialModel = Model Array.empty Dict.empty apiURL
     in
         searchesFromURL l initialModel
 
@@ -94,6 +95,7 @@ type Msg
     | AddBox
     | FetchSucceed Int String SearchResults
     | FetchFail Int Http.Error
+    | SelectOffer Bool Store Offer Book
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -154,6 +156,27 @@ update msg model =
                         else s.status
                     }
             in { model | searches = Array.Extra.update i u model.searches } ! []
+        SelectOffer checked store offer book ->
+            let
+                updateoffers (currstore, offers) =
+                    ( currstore
+                    ,
+                        if checked == True then
+                            Dict.insert offer.url (offer, book) offers
+                        else
+                            Dict.remove offer.url offers
+                    )
+            in
+                { model
+                    | selected =
+                        Dict.update store.url
+                            ( \maybeStore ->
+                                Just
+                                    <| updateoffers
+                                    <| Maybe.withDefault (store, Dict.empty) maybeStore
+                            )
+                            model.selected
+                } ! []
 
 searchesFromURL : Location -> Model -> (Model, Cmd Msg)
 searchesFromURL l model =
@@ -207,16 +230,19 @@ view model =
             [ node "link" [ rel "stylesheet", href "styles.css" ] []
             , node "title" [] [ text "busca múltipla na estante virtual" ]
             , div [ id "container" ]
-                [ div [ id "search" ]
-                    [ text "procure por livro ou autor, ou uma mistura dos dois:"
-                    , div []
-                        ( Array.indexedMap (lazy2 viewSearchBox) model.searches
-                            |> Array.toList
-                        )
-                    , button
-                        [ style [ ("display", "block"), ("margin", "auto") ]
-                        , onClick AddBox
-                        ] [ text "mais um campo de busca" ]
+                [ div [ id "left" ]
+                    [ div [ id "search" ]
+                        [ text "procure por livro ou autor, ou uma mistura dos dois:"
+                        , div []
+                            ( Array.indexedMap (lazy2 viewSearchBox) model.searches
+                                |> Array.toList
+                            )
+                        , button
+                            [ style [ ("display", "block"), ("margin", "auto") ]
+                            , onClick AddBox
+                            ] [ text "mais um campo de busca" ]
+                        ]
+                    , div [ id "selected" ] [ lazy viewSelected <| model.selected ]
                     ]
                 , div [ id "results" ] [ lazy viewResults <| results ]
                 ]
@@ -283,12 +309,12 @@ keyedViewStore store =
         , text ", "
         , text store.place
         , Keyed.node "table" []
-            (List.map keyedViewBook store.books)
+            (List.map (keyedViewBook store) store.books)
         ]
     )
 
-keyedViewBook : Book -> (String, Html Msg)
-keyedViewBook book =
+keyedViewBook : Store -> Book -> (String, Html Msg)
+keyedViewBook store book =
     ( book.title ++ ", " ++ book.author
     , tr [ class <| (++) "s" <| toString book.searchIndex ]
         [ td [ class "title" ]
@@ -296,20 +322,60 @@ keyedViewBook book =
             , text <| ", " ++ book.author
             ]
         , Keyed.node "td" [ class "price" ]
-            (List.map keyedViewOffer book.offers)
+            (List.map (keyedViewOffer store book) book.offers)
         ]
     )
 
-keyedViewOffer : Offer -> (String, Html Msg)
-keyedViewOffer o =
+keyedViewOffer : Store -> Book -> Offer -> (String, Html Msg)
+keyedViewOffer store book o =
     ( o.url
     , span [ title o.price ]
         [ text " "
-        , input [ type' "checkbox" ] []
+        , button [ onClick <| SelectOffer True store o book ] [ text "+" ]
+        , text " "
         , a [ href o.url, target "_blank" ]
             [ text <| Maybe.withDefault "~" <| List.head <| String.split "," o.price ]
         ]
     )
+
+viewSelected : Dict String (Store, Dict String (Offer, Book)) -> Html Msg
+viewSelected selected =
+    Keyed.ul []
+        (Dict.toList <| Dict.map (lazy2 viewSelectedStore) selected)
+
+
+viewSelectedStore : String -> (Store, Dict String (Offer, Book)) -> Html Msg
+viewSelectedStore _ (store, offers) =
+    let
+        parseFloat = Result.withDefault 0.0
+            << String.toFloat
+            << String.join "."
+            << String.split ","
+        sum = List.sum <| List.map (fst >> .price >> parseFloat) <| Dict.values offers
+        bookRows = Dict.toList <| Dict.map (viewSelectedOffer store) offers
+    in
+        li [] <|
+            if List.length bookRows == 0 then 
+                []
+            else
+                [ div []
+                    [ a [] [ text store.name ]
+                    , text " "
+                    , b [ style [ ("text-align", "right") ] ] [ text <| toString sum ]
+                    ]
+                , Keyed.node "table" [] bookRows
+                ]
+
+viewSelectedOffer : Store -> String -> (Offer, Book) -> Html Msg
+viewSelectedOffer store _ (offer, book) =
+    tr [ class <| (++) "s" <| toString book.searchIndex ]
+        [ td []
+            [ button [ onClick <| SelectOffer False store offer book ]
+                [ text "×" ]
+            ]
+        , td [ class "title" ] [ text book.title ]
+        , td [] [ text offer.price ]
+        ]
 
 
 -- HTTP

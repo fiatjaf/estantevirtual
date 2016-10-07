@@ -9,6 +9,10 @@ table {
   border: 1px solid black;
   border-collapse: collapse;
 }
+button {
+    font-size: 80%;
+    padding: 0 4px;
+}
 tr:hover td { background-color: #eeeeee }
 td { padding: 1px 6px }
 td.title { width: 70% }
@@ -18,12 +22,10 @@ input {
   font-size: 120%;
 }
 input + span { display: block; font-size: 90% }
-#search { margin-top: 26px }
-#search > div {
-  margin: 6px;
-}
-tr input[type="checkbox"] { display: none }
-tr:hover input[type="checkbox"], tr input:checked { display: inline }
+
+#results tr button { display: none }
+#results tr:hover button { display: inline }
+
 .s0 td.title, input[name="s0"] { color: #85144b }
 .s1 td.title, input[name="s1"] { color: #3D9970 }
 .s2 td.title, input[name="s2"] { color: #FF4136 }
@@ -47,12 +49,17 @@ tr:hover input[type="checkbox"], tr input:checked { display: inline }
   display: flex;
   flex-wrap: wrap;
 }
-#search {
+#left {
   -webkit-flex: 1;
           flex: 1;
+  margin-right: 10px;
 }
+#search { margin-top: 26px }
+#search > div { margin: 6px }
+#selected { margin-top: 26px}
+#selected td { font-size: 80% }
 #results{
-  -webkit-flex: 3;
-          flex: 3;
+  -webkit-flex: 5;
+          flex: 5;
   min-width: 370px;
 }
