@@ -1,0 +1,91 @@
+{
+	"ImportPath": "estantevirtual",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v62",
+	"Deps": [
+		{
+			"ImportPath": "github.com/PuerkitoBio/goquery",
+			"Comment": "v1.0.1-2-g152b1a2",
+			"Rev": "152b1a2c8f5d0340f658bb656032a39b94e52958"
+		},
+		{
+			"ImportPath": "github.com/andybalholm/cascadia",
+			"Rev": "1c31af6f6c1a7b101ed05aacc7d8a738b43ae86e"
+		},
+		{
+			"ImportPath": "github.com/hoisie/redis",
+			"Rev": "788f01e396a99c96c8f56338383926f16841ebae"
+		},
+		{
+			"ImportPath": "github.com/klauspost/compress/flate",
+			"Comment": "v1.0-13-g08fe86a",
+			"Rev": "08fe86a420401e830c24114bdf9f1ba91331407a"
+		},
+		{
+			"ImportPath": "github.com/klauspost/compress/gzip",
+			"Comment": "v1.0-13-g08fe86a",
+			"Rev": "08fe86a420401e830c24114bdf9f1ba91331407a"
+		},
+		{
+			"ImportPath": "github.com/klauspost/compress/zlib",
+			"Comment": "v1.0-13-g08fe86a",
+			"Rev": "08fe86a420401e830c24114bdf9f1ba91331407a"
+		},
+		{
+			"ImportPath": "github.com/klauspost/cpuid",
+			"Comment": "v1.0",
+			"Rev": "09cded8978dc9e80714c4d85b0322337b0a1e5e0"
+		},
+		{
+			"ImportPath": "github.com/klauspost/crc32",
+			"Comment": "v1.0",
+			"Rev": "19b0b332c9e4516a6370a0456e6182c3b5036720"
+		},
+		{
+			"ImportPath": "github.com/streamrail/concurrent-map",
+			"Rev": "65a174a3a4188c0b7099acbc6cfa0c53628d3287"
+		},
+		{
+			"ImportPath": "github.com/valyala/bytebufferpool",
+			"Rev": "e746df99fe4a3986f4d4f79e13c1e0117ce9c2f7"
+		},
+		{
+			"ImportPath": "github.com/valyala/fasthttp",
+			"Comment": "v20160617-35-g834fb48",
+			"Rev": "834fb48f10402a9c58ed0637ec47ba0d91f201c8"
+		},
+		{
+			"ImportPath": "github.com/valyala/fasthttp/fasthttputil",
+			"Comment": "v20160617-35-g834fb48",
+			"Rev": "834fb48f10402a9c58ed0637ec47ba0d91f201c8"
+		},
+		{
+			"ImportPath": "golang.org/x/net/html",
+			"Rev": "6acef71eb69611914f7a30939ea9f6e194c78172"
+		},
+		{
+			"ImportPath": "golang.org/x/net/html/atom",
+			"Rev": "6acef71eb69611914f7a30939ea9f6e194c78172"
+		},
+		{
+			"ImportPath": "golang.org/x/text/encoding",
+			"Rev": "3100578f0f8093e37883ba48c9187fe51367ad05"
+		},
+		{
+			"ImportPath": "golang.org/x/text/encoding/charmap",
+			"Rev": "3100578f0f8093e37883ba48c9187fe51367ad05"
+		},
+		{
+			"ImportPath": "golang.org/x/text/encoding/internal",
+			"Rev": "3100578f0f8093e37883ba48c9187fe51367ad05"
+		},
+		{
+			"ImportPath": "golang.org/x/text/encoding/internal/identifier",
+			"Rev": "3100578f0f8093e37883ba48c9187fe51367ad05"
+		},
+		{
+			"ImportPath": "golang.org/x/text/transform",
+			"Rev": "3100578f0f8093e37883ba48c9187fe51367ad05"
+		}
+	]
+}

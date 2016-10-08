@@ -34,8 +34,8 @@ func handler(ctx *fasthttp.RequestCtx) {
 	switch string(ctx.Path()) {
 	case "/":
 		fasthttp.ServeFile(ctx, "index.html")
-	case "/main.js":
-		fasthttp.ServeFile(ctx, "main.js")
+	case "/bundle.js", "/styles.css":
+		fasthttp.ServeFile(ctx, string(ctx.Path())[1:])
 	case "/search":
 		query := ctx.QueryArgs().Peek("q")
 		data := fetchDataForQuery(string(query))
