@@ -119,26 +119,20 @@ update msg model =
                     }
                 updated = { model | searches = Array.Extra.update i u model.searches }
                 fetch = fetchBooks model.apiURL i search.query
-                urlchange = Navigation.newUrl
-                    <| (++) "#"
-                    <| String.join "|"
-                    <| Array.toList
-                    <| Array.map .query model.searches
             in case search.status of
                 Found q _ ->
                     if q == search.query
-                        then model ! [ urlchange ]
-                        else updated ! [ fetch, urlchange ]
+                        then model ! [ updateURL model.searches ]
+                        else updated ! [ fetch, updateURL model.searches ]
                 Searching q ->
                     if q == search.query
-                        then model ! [ urlchange ]
-                        else updated ! [ fetch, urlchange ]
-                Waiting -> updated ! [ fetch, urlchange ]
-                Error _ -> updated ! [ fetch, urlchange ]
+                        then model ! [ updateURL model.searches ]
+                        else updated ! [ fetch, updateURL model.searches ]
+                Waiting -> updated ! [ fetch, updateURL model.searches ]
+                Error _ -> updated ! [ fetch, updateURL model.searches ]
         AddBox ->
-            { model
-                | searches = Array.push initialSearch model.searches
-            } ! []
+            let searches = Array.push initialSearch model.searches
+            in { model | searches = searches } ! [ updateURL searches ]
         FetchFail i err ->
             let u s = { s
                 | status = case err of
@@ -178,15 +172,24 @@ update msg model =
                             model.selected
                 } ! []
 
+updateURL : Array Search -> Cmd Msg
+updateURL searches = Navigation.newUrl
+    <| (++) "#"
+    <| String.join "|"
+    <| Array.toList
+    <| Array.map .query searches
+
 searchesFromURL : Location -> Model -> (Model, Cmd Msg)
 searchesFromURL l model =
     let
         queries =
-            Array.filter (\x -> x /= "") <| Array.fromList <| String.split "|" <| String.dropLeft 1 l.hash
+            Array.fromList <| String.split "|" <| String.dropLeft 1 l.hash
         newsearches = Array.indexedMap
             ( \i newquery ->
                 case Array.get i model.searches of
-                    Nothing -> Search newquery (Searching newquery)
+                    Nothing ->
+                        if newquery == "" then Search "" Waiting
+                        else Search newquery (Searching newquery)
                     Just old ->
                         if old.query == newquery then
                             old
@@ -374,7 +377,9 @@ viewSelectedOffer store _ (offer, book) =
                 [ text "×" ]
             ]
         , td [ class "title" ] [ text book.title ]
-        , td [] [ text offer.price ]
+        , td []
+            [ a [ href offer.url, target "_blank" ] [ text offer.price ]
+            ]
         ]
 
 
