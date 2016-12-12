@@ -177,13 +177,16 @@ updateURL searches = Navigation.newUrl
     <| (++) "#"
     <| String.join "|"
     <| Array.toList
+    <| Array.map (String.split " " >> String.join "+")
     <| Array.map .query searches
 
 searchesFromURL : Location -> Model -> (Model, Cmd Msg)
 searchesFromURL l model =
     let
-        queries =
-            Array.fromList <| String.split "|" <| String.dropLeft 1 l.hash
+        queries = Array.fromList
+            <| List.map (String.split "+" >> String.join " ")
+            <| String.split "|"
+            <| String.dropLeft 1 l.hash
         newsearches = Array.indexedMap
             ( \i newquery ->
                 case Array.get i model.searches of

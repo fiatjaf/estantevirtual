@@ -9501,10 +9501,18 @@ var _user$project$App$updateURL = function (searches) {
 				_elm_lang$core$Array$toList(
 					A2(
 						_elm_lang$core$Array$map,
-						function (_) {
-							return _.query;
+						function (_p0) {
+							return A2(
+								_elm_lang$core$String$join,
+								'+',
+								A2(_elm_lang$core$String$split, ' ', _p0));
 						},
-						searches)))));
+						A2(
+							_elm_lang$core$Array$map,
+							function (_) {
+								return _.query;
+							},
+							searches))))));
 };
 var _user$project$App$Model = F3(
 	function (a, b, c) {
@@ -9692,18 +9700,18 @@ var _user$project$App$viewResults = function (allResults) {
 				_elm_lang$core$Dict$update,
 				key,
 				function (maybeStore) {
-					var _p0 = maybeStore;
-					if (_p0.ctor === 'Nothing') {
+					var _p1 = maybeStore;
+					if (_p1.ctor === 'Nothing') {
 						return _elm_lang$core$Maybe$Just(store);
 					} else {
-						var _p1 = _p0._0;
+						var _p2 = _p1._0;
 						return _elm_lang$core$Maybe$Just(
 							_elm_lang$core$Native_Utils.update(
-								_p1,
+								_p2,
 								{
 									books: _elm_lang$core$List$concat(
 										_elm_lang$core$Native_List.fromArray(
-											[_p1.books, store.books]))
+											[_p2.books, store.books]))
 								}));
 					}
 				},
@@ -9726,10 +9734,10 @@ var _user$project$App$viewResults = function (allResults) {
 		A2(_elm_lang$core$List$map, _user$project$App$keyedViewStore, sortedStores));
 };
 var _user$project$App$viewSelectedOffer = F3(
-	function (store, _p3, _p2) {
-		var _p4 = _p2;
-		var _p6 = _p4._0;
-		var _p5 = _p4._1;
+	function (store, _p4, _p3) {
+		var _p5 = _p3;
+		var _p7 = _p5._0;
+		var _p6 = _p5._1;
 		return A2(
 			_elm_lang$html$Html$tr,
 			_elm_lang$core$Native_List.fromArray(
@@ -9741,7 +9749,7 @@ var _user$project$App$viewSelectedOffer = F3(
 								return A2(_elm_lang$core$Basics_ops['++'], x, y);
 							}),
 						's',
-						_elm_lang$core$Basics$toString(_p5.searchIndex)))
+						_elm_lang$core$Basics$toString(_p6.searchIndex)))
 				]),
 			_elm_lang$core$Native_List.fromArray(
 				[
@@ -9756,7 +9764,7 @@ var _user$project$App$viewSelectedOffer = F3(
 							_elm_lang$core$Native_List.fromArray(
 								[
 									_elm_lang$html$Html_Events$onClick(
-									A4(_user$project$App$SelectOffer, false, store, _p6, _p5))
+									A4(_user$project$App$SelectOffer, false, store, _p7, _p6))
 								]),
 							_elm_lang$core$Native_List.fromArray(
 								[
@@ -9771,7 +9779,7 @@ var _user$project$App$viewSelectedOffer = F3(
 						]),
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$html$Html$text(_p5.title)
+							_elm_lang$html$Html$text(_p6.title)
 						])),
 					A2(
 					_elm_lang$html$Html$td,
@@ -9783,27 +9791,27 @@ var _user$project$App$viewSelectedOffer = F3(
 							_elm_lang$html$Html$a,
 							_elm_lang$core$Native_List.fromArray(
 								[
-									_elm_lang$html$Html_Attributes$href(_p6.url),
+									_elm_lang$html$Html_Attributes$href(_p7.url),
 									_elm_lang$html$Html_Attributes$target('_blank')
 								]),
 							_elm_lang$core$Native_List.fromArray(
 								[
-									_elm_lang$html$Html$text(_p6.price)
+									_elm_lang$html$Html$text(_p7.price)
 								]))
 						]))
 				]));
 	});
 var _user$project$App$viewSelectedStore = F2(
-	function (_p8, _p7) {
-		var _p9 = _p7;
-		var _p13 = _p9._0;
-		var _p12 = _p9._1;
+	function (_p9, _p8) {
+		var _p10 = _p8;
+		var _p14 = _p10._0;
+		var _p13 = _p10._1;
 		var bookRows = _elm_lang$core$Dict$toList(
 			A2(
 				_elm_lang$core$Dict$map,
-				_user$project$App$viewSelectedOffer(_p13),
-				_p12));
-		var parseFloat = function (_p10) {
+				_user$project$App$viewSelectedOffer(_p14),
+				_p13));
+		var parseFloat = function (_p11) {
 			return A2(
 				_elm_lang$core$Result$withDefault,
 				0.0,
@@ -9811,19 +9819,19 @@ var _user$project$App$viewSelectedStore = F2(
 					A2(
 						_elm_lang$core$String$join,
 						'.',
-						A2(_elm_lang$core$String$split, ',', _p10))));
+						A2(_elm_lang$core$String$split, ',', _p11))));
 		};
 		var sum = _elm_lang$core$List$sum(
 			A2(
 				_elm_lang$core$List$map,
-				function (_p11) {
+				function (_p12) {
 					return parseFloat(
 						function (_) {
 							return _.price;
 						}(
-							_elm_lang$core$Basics$fst(_p11)));
+							_elm_lang$core$Basics$fst(_p12)));
 				},
-				_elm_lang$core$Dict$values(_p12)));
+				_elm_lang$core$Dict$values(_p13)));
 		return A2(
 			_elm_lang$html$Html$li,
 			_elm_lang$core$Native_List.fromArray(
@@ -9845,7 +9853,7 @@ var _user$project$App$viewSelectedStore = F2(
 								[]),
 							_elm_lang$core$Native_List.fromArray(
 								[
-									_elm_lang$html$Html$text(_p13.name)
+									_elm_lang$html$Html$text(_p14.name)
 								])),
 							_elm_lang$html$Html$text(' '),
 							A2(
@@ -9931,25 +9939,25 @@ var _user$project$App$fetchBooks = F3(
 	});
 var _user$project$App$update = F2(
 	function (msg, model) {
-		var _p14 = msg;
-		switch (_p14.ctor) {
+		var _p15 = msg;
+		switch (_p15.ctor) {
 			case 'UpdateBox':
 				var u = function (s) {
 					return _elm_lang$core$Native_Utils.update(
 						s,
-						{query: _p14._0._1, status: _user$project$App$Waiting});
+						{query: _p15._0._1, status: _user$project$App$Waiting});
 				};
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
 						{
-							searches: A3(_elm_community$array_extra$Array_Extra$update, _p14._0._0, u, model.searches)
+							searches: A3(_elm_community$array_extra$Array_Extra$update, _p15._0._0, u, model.searches)
 						}),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'SearchThis':
-				var _p17 = _p14._0;
+				var _p18 = _p15._0;
 				var u = function (s) {
 					return _elm_lang$core$Native_Utils.update(
 						s,
@@ -9960,21 +9968,21 @@ var _user$project$App$update = F2(
 				var updated = _elm_lang$core$Native_Utils.update(
 					model,
 					{
-						searches: A3(_elm_community$array_extra$Array_Extra$update, _p17, u, model.searches)
+						searches: A3(_elm_community$array_extra$Array_Extra$update, _p18, u, model.searches)
 					});
 				var search = function () {
-					var _p15 = A2(_elm_lang$core$Array$get, _p17, model.searches);
-					if (_p15.ctor === 'Nothing') {
+					var _p16 = A2(_elm_lang$core$Array$get, _p18, model.searches);
+					if (_p16.ctor === 'Nothing') {
 						return _user$project$App$initialSearch;
 					} else {
-						return _p15._0;
+						return _p16._0;
 					}
 				}();
-				var fetch = A3(_user$project$App$fetchBooks, model.apiURL, _p17, search.query);
-				var _p16 = search.status;
-				switch (_p16.ctor) {
+				var fetch = A3(_user$project$App$fetchBooks, model.apiURL, _p18, search.query);
+				var _p17 = search.status;
+				switch (_p17.ctor) {
 					case 'Found':
-						return _elm_lang$core$Native_Utils.eq(_p16._0, search.query) ? A2(
+						return _elm_lang$core$Native_Utils.eq(_p17._0, search.query) ? A2(
 							_elm_lang$core$Platform_Cmd_ops['!'],
 							model,
 							_elm_lang$core$Native_List.fromArray(
@@ -9989,7 +9997,7 @@ var _user$project$App$update = F2(
 									_user$project$App$updateURL(model.searches)
 								]));
 					case 'Searching':
-						return _elm_lang$core$Native_Utils.eq(_p16._0, search.query) ? A2(
+						return _elm_lang$core$Native_Utils.eq(_p17._0, search.query) ? A2(
 							_elm_lang$core$Platform_Cmd_ops['!'],
 							model,
 							_elm_lang$core$Native_List.fromArray(
@@ -10039,18 +10047,18 @@ var _user$project$App$update = F2(
 						s,
 						{
 							status: function () {
-								var _p18 = _p14._1;
-								switch (_p18.ctor) {
+								var _p19 = _p15._1;
+								switch (_p19.ctor) {
 									case 'Timeout':
 										return _user$project$App$Error('demorou demais');
 									case 'NetworkError':
 										return _user$project$App$Error('falha na conexão');
 									case 'UnexpectedPayload':
 										return _user$project$App$Error(
-											A2(_elm_lang$core$Basics_ops['++'], 'erro: ', _p18._0));
+											A2(_elm_lang$core$Basics_ops['++'], 'erro: ', _p19._0));
 									default:
 										return _user$project$App$Error(
-											A2(_elm_lang$core$Basics_ops['++'], 'erro no servidor: ', _p18._1));
+											A2(_elm_lang$core$Basics_ops['++'], 'erro no servidor: ', _p19._1));
 								}
 							}()
 						});
@@ -10060,7 +10068,7 @@ var _user$project$App$update = F2(
 					_elm_lang$core$Native_Utils.update(
 						model,
 						{
-							searches: A3(_elm_community$array_extra$Array_Extra$update, _p14._0, u, model.searches)
+							searches: A3(_elm_community$array_extra$Array_Extra$update, _p15._0, u, model.searches)
 						}),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
@@ -10069,7 +10077,7 @@ var _user$project$App$update = F2(
 					return _elm_lang$core$Native_Utils.update(
 						s,
 						{
-							status: _elm_lang$core$Native_Utils.eq(s.query, _p14._1) ? A2(_user$project$App$Found, s.query, _p14._2) : s.status
+							status: _elm_lang$core$Native_Utils.eq(s.query, _p15._1) ? A2(_user$project$App$Found, s.query, _p15._2) : s.status
 						});
 				};
 				return A2(
@@ -10077,24 +10085,24 @@ var _user$project$App$update = F2(
 					_elm_lang$core$Native_Utils.update(
 						model,
 						{
-							searches: A3(_elm_community$array_extra$Array_Extra$update, _p14._0, u, model.searches)
+							searches: A3(_elm_community$array_extra$Array_Extra$update, _p15._0, u, model.searches)
 						}),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			default:
-				var _p23 = _p14._1;
-				var _p22 = _p14._2;
-				var updateoffers = function (_p19) {
-					var _p20 = _p19;
-					var _p21 = _p20._1;
+				var _p24 = _p15._1;
+				var _p23 = _p15._2;
+				var updateoffers = function (_p20) {
+					var _p21 = _p20;
+					var _p22 = _p21._1;
 					return {
 						ctor: '_Tuple2',
-						_0: _p20._0,
-						_1: _elm_lang$core$Native_Utils.eq(_p14._0, true) ? A3(
+						_0: _p21._0,
+						_1: _elm_lang$core$Native_Utils.eq(_p15._0, true) ? A3(
 							_elm_lang$core$Dict$insert,
-							_p22.url,
-							{ctor: '_Tuple2', _0: _p22, _1: _p14._3},
-							_p21) : A2(_elm_lang$core$Dict$remove, _p22.url, _p21)
+							_p23.url,
+							{ctor: '_Tuple2', _0: _p23, _1: _p15._3},
+							_p22) : A2(_elm_lang$core$Dict$remove, _p23.url, _p22)
 					};
 				};
 				return A2(
@@ -10104,13 +10112,13 @@ var _user$project$App$update = F2(
 						{
 							selected: A3(
 								_elm_lang$core$Dict$update,
-								_p23.url,
+								_p24.url,
 								function (maybeStore) {
 									return _elm_lang$core$Maybe$Just(
 										updateoffers(
 											A2(
 												_elm_lang$core$Maybe$withDefault,
-												{ctor: '_Tuple2', _0: _p23, _1: _elm_lang$core$Dict$empty},
+												{ctor: '_Tuple2', _0: _p24, _1: _elm_lang$core$Dict$empty},
 												maybeStore)));
 								},
 								model.selected)
@@ -10123,22 +10131,30 @@ var _user$project$App$searchesFromURL = F2(
 	function (l, model) {
 		var queries = _elm_lang$core$Array$fromList(
 			A2(
-				_elm_lang$core$String$split,
-				'|',
-				A2(_elm_lang$core$String$dropLeft, 1, l.hash)));
+				_elm_lang$core$List$map,
+				function (_p25) {
+					return A2(
+						_elm_lang$core$String$join,
+						' ',
+						A2(_elm_lang$core$String$split, '+', _p25));
+				},
+				A2(
+					_elm_lang$core$String$split,
+					'|',
+					A2(_elm_lang$core$String$dropLeft, 1, l.hash))));
 		var newsearches = A2(
 			_elm_lang$core$Array$indexedMap,
 			F2(
 				function (i, newquery) {
-					var _p24 = A2(_elm_lang$core$Array$get, i, model.searches);
-					if (_p24.ctor === 'Nothing') {
+					var _p26 = A2(_elm_lang$core$Array$get, i, model.searches);
+					if (_p26.ctor === 'Nothing') {
 						return _elm_lang$core$Native_Utils.eq(newquery, '') ? A2(_user$project$App$Search, '', _user$project$App$Waiting) : A2(
 							_user$project$App$Search,
 							newquery,
 							_user$project$App$Searching(newquery));
 					} else {
-						var _p25 = _p24._0;
-						return _elm_lang$core$Native_Utils.eq(_p25.query, newquery) ? _p25 : (_elm_lang$core$Native_Utils.eq(newquery, '') ? A2(_user$project$App$Search, '', _user$project$App$Waiting) : A2(
+						var _p27 = _p26._0;
+						return _elm_lang$core$Native_Utils.eq(_p27.query, newquery) ? _p27 : (_elm_lang$core$Native_Utils.eq(newquery, '') ? A2(_user$project$App$Search, '', _user$project$App$Waiting) : A2(
 							_user$project$App$Search,
 							newquery,
 							_user$project$App$Searching(newquery)));
@@ -10152,11 +10168,11 @@ var _user$project$App$searchesFromURL = F2(
 				_elm_lang$core$Array$indexedMap,
 				F2(
 					function (i, s) {
-						var _p26 = s.status;
-						switch (_p26.ctor) {
+						var _p28 = s.status;
+						switch (_p28.ctor) {
 							case 'Searching':
 								return _elm_lang$core$Maybe$Just(
-									{ctor: '_Tuple2', _0: i, _1: _p26._0});
+									{ctor: '_Tuple2', _0: i, _1: _p28._0});
 							case 'Waiting':
 								return _elm_lang$core$Maybe$Nothing;
 							case 'Found':
@@ -10169,9 +10185,9 @@ var _user$project$App$searchesFromURL = F2(
 		var tasks = _elm_lang$core$Array$toList(
 			A2(
 				_elm_lang$core$Array$map,
-				function (_p27) {
-					var _p28 = _p27;
-					return A3(_user$project$App$fetchBooks, model.apiURL, _p28._0, _p28._1);
+				function (_p29) {
+					var _p30 = _p29;
+					return A3(_user$project$App$fetchBooks, model.apiURL, _p30._0, _p30._1);
 				},
 				changedsearches));
 		var filledsearches = A2(
@@ -10190,18 +10206,18 @@ var _user$project$App$searchesFromURL = F2(
 	});
 var _user$project$App$init = function (l) {
 	var host = function () {
-		var _p29 = _elm_lang$core$List$head(
+		var _p31 = _elm_lang$core$List$head(
 			A2(_elm_lang$core$String$split, ':', l.host));
-		if (_p29.ctor === 'Nothing') {
+		if (_p31.ctor === 'Nothing') {
 			return l.host;
 		} else {
-			return _p29._0;
+			return _p31._0;
 		}
 	}();
 	var port_ = function () {
-		var _p30 = _elm_lang$core$String$toInt(l.port_);
-		if (_p30.ctor === 'Ok') {
-			return _p30._0 + 1;
+		var _p32 = _elm_lang$core$String$toInt(l.port_);
+		if (_p32.ctor === 'Ok') {
+			return _p32._0 + 1;
 		} else {
 			return _elm_lang$core$Native_Utils.eq(l.protocol, 'http:') ? 80 : 443;
 		}
@@ -10232,15 +10248,15 @@ var _user$project$App$UpdateBox = function (a) {
 var _user$project$App$viewSearchBox = F2(
 	function (i, search) {
 		var message = function () {
-			var _p31 = search.status;
-			switch (_p31.ctor) {
+			var _p33 = search.status;
+			switch (_p33.ctor) {
 				case 'Waiting':
 					return '';
 				case 'Searching':
 					return 'procurando...';
 				case 'Found':
-					var _p32 = _p31._1;
-					var nstores = _elm_lang$core$Dict$size(_p32);
+					var _p34 = _p33._1;
+					var nstores = _elm_lang$core$Dict$size(_p34);
 					var nbooks = _elm_lang$core$List$length(
 						_elm_lang$core$List$concat(
 							A2(
@@ -10248,7 +10264,7 @@ var _user$project$App$viewSearchBox = F2(
 								function (_) {
 									return _.books;
 								},
-								_elm_lang$core$Dict$values(_p32))));
+								_elm_lang$core$Dict$values(_p34))));
 					return _elm_lang$core$Native_Utils.eq(nbooks, 0) ? 'nada foi encontrado.' : A2(
 						_elm_lang$core$Basics_ops['++'],
 						_elm_lang$core$Basics$toString(nbooks),
@@ -10260,7 +10276,7 @@ var _user$project$App$viewSearchBox = F2(
 								_elm_lang$core$Basics$toString(nstores),
 								' lojas.')));
 				default:
-					return _p31._0;
+					return _p33._0;
 			}
 		}();
 		return A2(
@@ -10301,8 +10317,8 @@ var _user$project$App$viewSearchBox = F2(
 	});
 var _user$project$App$view = function (model) {
 	var getResult = function (s) {
-		var _p33 = s.status;
-		switch (_p33.ctor) {
+		var _p35 = s.status;
+		switch (_p35.ctor) {
 			case 'Waiting':
 				return _elm_lang$core$Dict$empty;
 			case 'Searching':
@@ -10310,7 +10326,7 @@ var _user$project$App$view = function (model) {
 			case 'Error':
 				return _elm_lang$core$Dict$empty;
 			default:
-				return _p33._1;
+				return _p35._1;
 		}
 	};
 	var results = A2(_elm_lang$core$Array$map, getResult, model.searches);
@@ -10427,7 +10443,7 @@ var _user$project$App$main = {
 			view: _user$project$App$view,
 			update: _user$project$App$update,
 			urlUpdate: _user$project$App$searchesFromURL,
-			subscriptions: function (_p34) {
+			subscriptions: function (_p36) {
 				return _elm_lang$core$Platform_Sub$none;
 			}
 		})
